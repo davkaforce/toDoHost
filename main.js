@@ -38,20 +38,26 @@ let myArrayTask2 = [];
 let myArrayTask3 = [];
 let myArrayTask4 = [];
 
-let AllArrays = [myArrayTask1, myArrayTask2, myArrayTask3, myArrayTask4];
+console.log(myArrayTask1);
 
 let myLocalStringArray1 = [];
 let myLocalStringArray2 = [];
 let myLocalStringArray3 = [];
 let myLocalStringArray4 = [];
 
+let AllArrays = [myArrayTask1, myArrayTask2, myArrayTask3, myArrayTask4];
+
 let cards1 = document.getElementById("cards1");
 let cards2 = document.getElementById("cards2");
 let cards3 = document.getElementById("cards3");
 let cards4 = document.getElementById("cards4");
 
-let dragTaskArray;
+let dragTaskArrayId;
 let dragTaskIndex;
+let tempArray = [];
+
+let localStorageOn;
+localStorageOn = Number(localStorage.getItem(`localStorageOnSave`));
 
 // "new task" popup window creation
 
@@ -101,6 +107,8 @@ modalContentEdit.appendChild(inButtonEdit);
 
 function render(array, cards) {
   cards.innerHTML = "";
+  // empty the card
+
   console.log("render works");
   // declaring temporary object var for task arrays
   let myObjectTask;
@@ -108,9 +116,10 @@ function render(array, cards) {
   //understanding whether new task or edit task
   if (currentBoardButton !== 0) {
     myObjectTask = { myTask: taskName.value, myDesc: taskDesc.value };
-
+    console.log(myObjectTask);
     array.push(myObjectTask);
   }
+
   // actual rendering
   array.map((element, index) => {
     console.log("array map works");
@@ -123,8 +132,8 @@ function render(array, cards) {
     taskDiv.addEventListener("dragstart", () => {
       taskDiv.classList.add("dragging");
       dragTaskIndex = index;
-      dragTaskArray = AllArrays.indexOf(array);
-      // console.log(dragTaskArray, dragTaskIndex);
+      dragTaskArrayId = cards.id;
+      console.log(dragTaskArrayId);
     });
     taskDiv.addEventListener("dragend", () => {
       taskDiv.classList.remove("dragging");
@@ -186,12 +195,16 @@ function render(array, cards) {
   localStorage.setItem("myLocalStorageArray2", myLocalStringArray2);
   localStorage.setItem("myLocalStorageArray3", myLocalStringArray3);
   localStorage.setItem("myLocalStorageArray4", myLocalStringArray4);
+
+  localStorageOn = 1;
+  let localStorageOnString = JSON.stringify(localStorageOn);
+  localStorage.setItem("localStorageOnSave", localStorageOnString);
 }
 
 // "add new task" button in popup window
 
 inButton.addEventListener("click", () => {
-  console.log("check", currentBoardButton);
+  console.log("checkcheck", currentBoardButton);
   if (currentBoardButton == 1) {
     render(myArrayTask1, cards1);
   }
@@ -206,6 +219,7 @@ inButton.addEventListener("click", () => {
   }
 });
 
+// render();
 // close add/edit task window when clicked outside
 
 window.onclick = function (event) {
@@ -219,49 +233,101 @@ window.onclick = function (event) {
 // drag and drop section
 
 const cardsContainers = document.querySelectorAll(".cards");
-cardsContainers.forEach((container, index) => {
-  container.addEventListener("dragover", (e) => {
+cardsContainers.forEach((cards, index) => {
+  cards.addEventListener("dragover", (e) => {
     e.preventDefault();
     const draggable = document.querySelector(".dragging");
-    container.appendChild(draggable);
+    cards.appendChild(draggable);
   });
 
-  container.addEventListener("drop", (e) => {
+  cards.addEventListener("drop", (e) => {
     e.preventDefault();
-    const draggable = document.querySelector(".dragging");
-    const sourceIndex = dragTaskIndex;
-    const sourceArray = AllArrays[dragTaskArray];
-    const destinationArray = AllArrays[index];
+    //update the dragstart board
+    let tempObject;
+    if (dragTaskArrayId == "cards1") {
+      tempObject = myArrayTask1[dragTaskIndex];
+      myArrayTask1.splice(dragTaskIndex, 1);
+      console.log("check1");
+    }
+    if (dragTaskArrayId == "cards2") {
+      tempObject = myArrayTask2[dragTaskIndex];
+      myArrayTask2.splice(dragTaskIndex, 1);
+    }
+    if (dragTaskArrayId == "cards3") {
+      tempObject = myArrayTask3[dragTaskIndex];
+      myArrayTask3.splice(dragTaskIndex, 1);
+    }
+    if (dragTaskArrayId == "cards4") {
+      tempObject = myArrayTask4[dragTaskIndex];
+      myArrayTask4.splice(dragTaskIndex, 1);
+    }
+    console.log("checkkkk", tempObject);
 
-    // Move the task from the source array to the destination array
-    const taskToMove = sourceArray[sourceIndex];
-    sourceArray.splice(sourceIndex, 1);
-    destinationArray.push(taskToMove);
+    // update the drop board
+    if (cards.id == "cards1") {
+      myArrayTask1.push(tempObject);
+    }
+    if (cards.id == "cards2") {
+      myArrayTask2.push(tempObject);
+    }
+    if (cards.id == "cards3") {
+      myArrayTask3.push(tempObject);
+    }
+    if (cards.id == "cards4") {
+      myArrayTask4.push(tempObject);
+    }
 
     // Re-render the tasks to reflect the changes
-    render(sourceArray, cardsContainers[dragTaskArray]);
-    render(destinationArray, cardsContainers[index]);
+
+    render(myArrayTask1, cards1);
+    render(myArrayTask2, cards2);
+    render(myArrayTask3, cards3);
+    render(myArrayTask4, cards4);
   });
 });
 
 // Render using localstorage
 
-myLocalStringArray1 = localStorage.getItem("myLocalStorageArray1");
-myLocalStringArray2 = localStorage.getItem("myLocalStorageArray2");
-myLocalStringArray3 = localStorage.getItem("myLocalStorageArray3");
-myLocalStringArray4 = localStorage.getItem("myLocalStorageArray4");
+if (localStorageOn == 1) {
+  myLocalStringArray1 = localStorage.getItem("myLocalStorageArray1");
+  myLocalStringArray2 = localStorage.getItem("myLocalStorageArray2");
+  myLocalStringArray3 = localStorage.getItem("myLocalStorageArray3");
+  myLocalStringArray4 = localStorage.getItem("myLocalStorageArray4");
 
-let myLocalArray1 = JSON.parse(myLocalStringArray1);
-let myLocalArray2 = JSON.parse(myLocalStringArray2);
-let myLocalArray3 = JSON.parse(myLocalStringArray3);
-let myLocalArray4 = JSON.parse(myLocalStringArray4);
+  let myLocalArray1 = JSON.parse(myLocalStringArray1);
+  let myLocalArray2 = JSON.parse(myLocalStringArray2);
+  let myLocalArray3 = JSON.parse(myLocalStringArray3);
+  let myLocalArray4 = JSON.parse(myLocalStringArray4);
 
-myArrayTask1 = myLocalArray1;
-myArrayTask2 = myLocalArray2;
-myArrayTask3 = myLocalArray3;
-myArrayTask4 = myLocalArray4;
+  myArrayTask1 = myLocalArray1;
+  myArrayTask2 = myLocalArray2;
+  myArrayTask3 = myLocalArray3;
+  myArrayTask4 = myLocalArray4;
 
-render(myArrayTask1, cards1);
-render(myArrayTask2, cards2);
-render(myArrayTask3, cards3);
-render(myArrayTask4, cards4);
+  render(myArrayTask1, cards1);
+  render(myArrayTask2, cards2);
+  render(myArrayTask3, cards3);
+  render(myArrayTask4, cards4);
+}
+
+// const tasks = [
+//   { title: "To Do", id: "todo" },
+//   { title: "In progress", id: "inprogress" },
+
+//   { title: "Stuck", id: "stuck" },
+//   { title: "Done", id: "done" },
+// ];
+
+// // const allTask = [
+// //   {title:'', desc:'', id:'', status:'stuck'}
+// // ]
+
+// tasks.map((task)=>{
+
+// })
+
+// const addTask = ()=>{
+//   let cards = document.getElementsByClassName
+
+//  cards.appendChild(task)
+// }
